@@ -214,7 +214,6 @@ cgalign('c', 'c')
 % gb = reshape(pattern,xsize*ysize,1);
 % gb = [gb,gb,gb];
 % cgloadarray(Id,xsize,ysize,gb,xsize,ysize)
-
 cgtrncol(Id,'w')
 
 end

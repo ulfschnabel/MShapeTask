@@ -10,9 +10,13 @@ if ~isfield(StimObj, 'Stm')
     return
 end
 
-
-Log = [];
+Par.helpline = 1;
 h = gcf;
+if Par.helpline
+    figure
+    Par.barlh = uicontrol('Style','edit','String','1');
+end
+Log = [];
 logfile = input('Please enter a name for the logfile \n','s');
 Par.Ndistract = str2double(input('Please enter the number of distractors \n','s'));
 figure(h)
@@ -272,8 +276,11 @@ while ~Par.ESC
         %             cgrect(-462, 334, 100, 100) %test stimulus for light diode
         %             cgellipse(Px,Py,20,20,[1 0 0 ],'f') %fixation dot
         %             cgellipse(Par.WIN(1,2), Par.WIN(2,2), 20, 20, [1 0 0 ], 'f') %target
+        drawhelpline
         cgplotstim(EVENT{STM}, Objs);
         %..............................................................
+
+        
         FO = cgflip(BG(1), BG(2), BG(3));
         FS = FO;
         %cgflip('v'); %this is not nice; cgflip does not give good timing
@@ -285,6 +292,7 @@ while ~Par.ESC
         
         %prepare display for next flip TARGON.................
         if ~isempty(EVENT{TARG})
+            drawhelpline
             cgplotstim(EVENT{TARG}, Objs);
 %             EPoch = min( STIMT-10, TARGT-50); %determine smallest time
 %             while Time < EPoch  && Hit == 0
@@ -330,6 +338,7 @@ while ~Par.ESC
         refreshtracker(3) %set fix point to green
         Time = 0;
         if ~isempty(EVENT{TARGOF}) && Par.easymode > 0
+            drawhelpline
             cgplotstim(EVENT{TARGOF}, Objs);
             %prepare display for next flip.................
         end
@@ -496,5 +505,22 @@ for t = 1:2
         end
     end
 end
+end
+
+function drawhelpline
+        global Par
+        if Par.helpline
+            cgpencol(0, 0, 0)
+            cgpenwid(3)
+            if Par.Target == 1
+                tx = -395.5;
+            else
+                tx = 395.5;
+            end
+            vector = [tx, 0] - [40, -80];
+            mag = norm(vector);
+            vec = vector/mag;
+            cgdraw(40, -80, 40 + vec(1)*mag*str2double(get(Par.barlh, 'String')) , -80 + vec(2)*mag*str2double(get(Par.barlh, 'String'))) 
+        end
 end
 
