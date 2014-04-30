@@ -29,6 +29,7 @@ end
 
 trials = [];
 tc = 0;
+lc = 0;
 Times = Par.Times; %copy timing structure
 BG = Par.BG; %background Color
 cgflip(BG(1), BG(2), BG(3))
@@ -425,7 +426,7 @@ while ~Par.ESC
     end
     
      if logon && ~Abort
-         lc = lc + 1;
+        lc = lc + 1;
         Log.Trial(lc) = tc;
         Log.Hit(lc) = Hit;
         Log.Target(lc) = Par.Target;
