@@ -10,7 +10,7 @@ if ~isfield(StimObj, 'Stm')
     return
 end
 
-Par.helpline = 1;
+Par.helpline = 0;
 h = gcf;
 if Par.helpline
     figure
@@ -95,7 +95,7 @@ while ~Par.ESC
         
         Par.Target = trials(t, 1);
         Par.Distractor = trials(t, 2);
-        Par.Targetpos = 1; %trials(t, 3);
+        Par.Targetpos = trials(t, 3);
         Par.Distractorpos = trials(t, 4);
         
         %or use custom randomisation procedure
@@ -424,27 +424,28 @@ while ~Par.ESC
         
     end
     
-     if logon
-        Log.Trial(tc) = tc;
-        Log.Hit(tc) = Hit;
-        Log.Target(tc) = Par.Target;
-        Log.Distractor(tc) = Par.Distractor;
-        Log.Targetpos(tc) = Par.Targetpos;
-        Log.Distractorpos(tc) = Par.Distractorpos;
+     if logon && ~Abort
+         lc = lc + 1;
+        Log.Trial(lc) = tc;
+        Log.Hit(lc) = Hit;
+        Log.Target(lc) = Par.Target;
+        Log.Distractor(lc) = Par.Distractor;
+        Log.Targetpos(lc) = Par.Targetpos;
+        Log.Distractorpos(lc) = Par.Distractorpos;
         if Hit > 0
-            Log.RT(tc) = Time;
+            Log.RT(lc) = Time;
         else
-           Log.RT(tc) = NaN;
+           Log.RT(lc) = NaN;
         end
         Log.Ndistractors = Par.Ndistract;
-        Log.Easymode(tc) = Par.easymode;
-        Log.Easy(tc) = easy;
+        Log.Easymode(lc) = Par.easymode;
+        Log.Easy(lc) = easy;
         Log.Par = Par;
         Log.Shape = Objs(shapeobjid);
         save(['log\' logfile], 'Log')
     end
     
-    if Hit ~= 2  %error response
+    if Hit ~= 2 && ~Abort  %error response
         %add pause when subject makes error
         for i = 1:round(Times.Err/5)   %keep targoff for Times.Err(ms)
             pause(0.005)
@@ -495,7 +496,7 @@ function details = filldetails
 n = 0;
 for t = 1:2
     for d = 1:2
-        for tp = 1:3
+        for tp = 1:3 % 3
             for dp = 1:3
                 if tp ~= dp
                     n = n+1;
