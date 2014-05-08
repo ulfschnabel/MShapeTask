@@ -168,7 +168,11 @@ if ~isfield(Par, 'Ndistract')
     Par.Distractorpos = str2double(answer{5});
 end
 
-tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos)];
+rdpos = 1:3;
+rdpos([Par.Targetpos Par.Distractorpos]) = [];
+
+tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos), Shape.Targetpos(rdpos)];
+
 if Par.Ndistract > 0
     typevec = [Shape.Targets(Par.Target) Shape.Distractors(Par.Distractor) randsample(Shape.Randdistractors, Par.Ndistract-1,  0)];
     if Par.Ndistract <= Shape.NIn - 1;
@@ -203,6 +207,10 @@ for i = 1:length(typevec)
     cgloadarray(spriten,xsize,ysize,gb,xsize,ysize)
     cgtrncol(spriten,'w')
     cgdrawsprite(spriten,Shape.gridx(posvec(i)) ,Shape.gridy(posvec(i)))%, round(xsize * scalefactor), round(ysize * scalefactor))
+    if i == 1
+        Par.TarX = Shape.gridx(posvec(i));
+        Par.TarY = Shape.gridy(posvec(i));
+    end
 end
 cgalign('c', 'c')
 % pattern = double((base > 0))* Shape.col(1);
