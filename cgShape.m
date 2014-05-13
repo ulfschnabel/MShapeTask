@@ -199,7 +199,18 @@ for i = 1:length(typevec)
     scalefactor = ysize/Shape.Size;
     
     gb = reshape(Shape.stimuli{ori, typevec(i)},xsize*ysize,1);
-    gb = [gb,gb,gb];
+    if Par.color > 0 && i == 1
+       gbcol =  gb;
+       gb(gb < 0) = 1*Par.color;
+           if Par.Target == 1
+              gb = [gb,gb,gbcol];
+           else
+              gb = [gbcol,gbcol,gb];
+           end
+    else
+        gb = [gb,gb,gb];
+    end
+
     cgloadarray(spriten,xsize,ysize,gb,xsize,ysize)
     cgtrncol(spriten,'w')
     cgdrawsprite(spriten,Shape.gridx(posvec(i)) ,Shape.gridy(posvec(i)))%, round(xsize * scalefactor), round(ysize * scalefactor))
