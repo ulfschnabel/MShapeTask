@@ -10,7 +10,7 @@ if ~isfield(StimObj, 'Stm')
     return
 end
 
-Par.helpline = 0;
+Par.helpline = 1;
 h = gcf;
 if Par.helpline
     figure
@@ -509,10 +509,10 @@ for t = 1:2
                 if tp ~= dp
                     n = n+1;
                     details(n, :) = [t, d, tp, dp, n];
-                    if tp == 1 || tp == 3
-                        n = n+1;
-                        details(n, :) = [t, d, tp, dp, n];
-                    end
+%                     if tp == 1 || tp == 3
+%                         n = n+1;
+%                         details(n, :) = [t, d, tp, dp, n];
+%                     end
                 end
             end
         end
@@ -524,16 +524,16 @@ function drawhelpline
         global Par
         if Par.helpline
             cgpencol(0, 0, 0)
-            cgpenwid(3)
+            cgpenwid(2)
             if Par.Target == 1
                 tx = -395.5;
             else
                 tx = 395.5;
             end
-            vector = [tx, 0] - [Par.TarX - 43, Par.TarY];
+            vector = [tx, 0] - [Par.TarX - 30, Par.TarY];
             mag = norm(vector);
             vec = vector/mag;
-            cgdraw(Par.TarX-43, Par.TarY, Par.TarX - 43 + vec(1)*mag*str2double(get(Par.barlh, 'String')) , Par.TarY + vec(2)*mag*str2double(get(Par.barlh, 'String'))) 
+            cgdraw(Par.TarX-30, Par.TarY, Par.TarX - 30 + vec(1)*mag*str2double(get(Par.barlh, 'String')) , Par.TarY + vec(2)*mag*str2double(get(Par.barlh, 'String'))) 
         end
 end
 
