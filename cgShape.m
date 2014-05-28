@@ -166,6 +166,7 @@ if ~isfield(Par, 'Ndistract')
     Par.Ndistract = str2double(answer{3});
     Par.Targetpos = str2double(answer{4});
     Par.Distractorpos = str2double(answer{5});
+    Par.color = 0;
 end
 
 tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos)];

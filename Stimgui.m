@@ -22,7 +22,7 @@ function varargout = Stimgui(varargin)
 
 % Edit the above text to modify the response to help Stimgui
 
-% Last Modified by GUIDE v2.5 28-Mar-2013 13:51:35
+% Last Modified by GUIDE v2.5 28-May-2014 17:37:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -972,7 +972,10 @@ global StimObj
                         cgellipse(Talt(k,1), Talt(k,2), Talt(k,3), Talt(k,4), [1 1 1])
                         cgtext( 'I_T', Talt(k,1), Talt(k,2) + 50)
                     end
-                    
+                    h = findobj('Tag', 'rfindicator');
+                    if strcmp(get(h, 'string'), 'OK')
+                       cgdrawsprite(999, 0, 0) 
+                    end
                     cgflip(BGcolor(1), BGcolor(2), BGcolor(3));
 
                     pause( 2)
@@ -1086,3 +1089,25 @@ function T_BGColor_Callback(hObject, eventdata, handles)
  
  
  
+
+
+% --- Executes on button press in loadrfbutton.
+function loadrfbutton_Callback(hObject, eventdata, handles)
+% hObject    handle to loadrfbutton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+rflog = uigetfile('*.mat');
+
+rflog = load(rflog);
+rflog = rflog.export;
+
+
+cgmakesprite(999, 1024, 768, [1 1 1])
+cgsetsprite(999)
+for i = 1:size(rflog, 1)
+   cgellipse(rflog(i, 1), rflog(i,2), 5 , 5, [1 0 0])
+end
+cgsetsprite(0)
+cgtrncol(999,'w')
+h = findobj('Tag', 'rfindicator');
+set(h, 'string', 'OK')
