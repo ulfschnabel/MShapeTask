@@ -38,7 +38,7 @@ if nargin > 0
             def = {num2str(Shape.RF(1)),num2str(Shape.RF(2)),num2str(Shape.NIn), num2str(Shape.NOut), num2str(Shape.Size), mat2str(Shape.Targets ), mat2str(Shape.Distractors), mat2str(Shape.Targetpos), num2str(Shape.Orientation)};
             answer = inputdlg(prompt,dlg_title,num_lines,def);
             
-
+            
             Shape.Randdistractors = 1:length([Shape.Randdistractors Shape.Targets Shape.Distractors]);
             
             Shape.Size = str2double(answer{5});
@@ -48,12 +48,29 @@ if nargin > 0
             Shape.NOut = str2double(answer{4});
             Shape.Targets = str2num(str2mat(answer{6}));
             Shape.Distractors = str2num(str2mat(answer{7}));
-            Shape.Targetpos = str2num(str2mat(answer{8}));           
+            Shape.Targetpos = str2num(str2mat(answer{8}));
             Shape.Orientation = str2double(answer{9});
             col = uisetcolor(Shape.col);
             Shape.col = col;
             Shape.isLoaded = false; %true when a sprite is made for this Shape
             
+            Shape.Randdistractors([Shape.Targets Shape.Distractors]) = [];
+            
+            [fileName, pathName, filterIndex] = uigetfile('*.mat', 'MultiSelect', 'off');
+            
+            load([pathName fileName]);
+            for i = 1:length(goodhalfcirc)
+                %         if (round(rand(1)) || i == Shape.Targets(2) || i == Shape.Distractors(2)) && ~(i == Shape.Targets(1) || i == Shape.Distractors(1))
+                %             Shape.stimuli(i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, 5), 180)};
+                %             Shape.orientation(i) = 2;
+                %         else
+                %             Shape.stimuli(i) = {MakeShapeImage(goodhalfcirc{i}, Shape.Size, 5)};
+                %             Shape.orientation(i) = 1;
+                %         end
+                Shape.stimuli(2, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 180)};
+                Shape.stimuli(1, i) = {MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25))};
+            end
+            Shape.Randdistractors = 1:length(goodhalfcirc);
             Shape.Randdistractors([Shape.Targets Shape.Distractors]) = [];
             
             return
@@ -112,7 +129,7 @@ else
     col = uisetcolor([0.5 0.5 0.5]);
     Shape.col = col;
     Shape.isLoaded = false; %true when a sprite is made for this Shape
-
+    
     [fileName, pathName, filterIndex] = uigetfile('*.mat', 'MultiSelect', 'off');
     
     load([pathName fileName]);
@@ -168,23 +185,26 @@ if ~isfield(Par, 'Ndistract')
     Par.Distractorpos = str2double(answer{5});
 end
 
-rdpos = 1:3;
-rdpos([Par.Targetpos Par.Distractorpos]) = [];
-
-tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos), Shape.Targetpos(rdpos)];
-
-if Par.Ndistract > 0
+tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos), Shape.Targetpos(Par.Randpos)];
+if Par.Ndistract > 1
     typevec = [Shape.Targets(Par.Target) Shape.Distractors(Par.Distractor) randsample(Shape.Randdistractors, Par.Ndistract-1,  0)];
-    if Par.Ndistract <= Shape.NIn - 1;
-        distpos = 1:Shape.NIn;
-        distpos(tdpos) = [];
-        distpos = randsample(distpos, Par.Ndistract-1, 0);
-    else
-        distpos = 1:Shape.NOut+Shape.NIn;
-        distpos(tdpos) = [];
-        distpos = randsample(distpos, Par.Ndistract-1, 0);
+    distpos = [];
+    if Par.Ndistract > 2
+        if Par.Ndistract <= Shape.NIn - 1;
+            distpos = 1:Shape.NIn;
+            distpos(tdpos) = [];
+            distpos = randsample(distpos, Par.Ndistract-1, 0);
+        else
+            distpos = Shape.NIn + 1:Shape.NOut;
+            innerdistpos = 1:Shape.NIn;
+            innerdistpos(tdpos) = [];
+            distpos = [innerdistpos randsample(distpos, Par.Ndistract- Shape.NIn + 1, 0)];
+        end
     end
     posvec = [tdpos distpos];
+elseif Par.Ndistract > 0
+    typevec = [Shape.Targets(Par.Target) Shape.Distractors(Par.Distractor)];
+    posvec = tdpos(1:2);
 else
     posvec = tdpos(1);
     typevec = Shape.Targets(Par.Target);
@@ -203,16 +223,27 @@ for i = 1:length(typevec)
     scalefactor = ysize/Shape.Size;
     
     gb = reshape(Shape.stimuli{ori, typevec(i)},xsize*ysize,1);
-    gb = [gb,gb,gb];
+    if Par.color > 0 && i == 1
+        gbcol = gb;
+        gbcol(gb < 1) = 1*Par.color;
+        if Par.Target == 1
+            gb = [gb,gb,gbcol];
+        else
+            gb = [gbcol,gbcol,gb];
+        end
+    else
+        gb = [gb,gb,gb];
+    end
+    
     cgloadarray(spriten,xsize,ysize,gb,xsize,ysize)
     cgtrncol(spriten,'w')
     cgdrawsprite(spriten,Shape.gridx(posvec(i)) ,Shape.gridy(posvec(i)))%, round(xsize * scalefactor), round(ysize * scalefactor))
-    if i == 1
-        Par.TarX = Shape.gridx(posvec(i));
-        Par.TarY = Shape.gridy(posvec(i));
-    end
+    
 end
 cgalign('c', 'c')
+
+Par.TarX = Shape.gridx(posvec(1));
+Par.TarY = Shape.gridy(posvec(1));
 % pattern = double((base > 0))* Shape.col(1);
 %
 % [xsize ysize] = size(pattern);

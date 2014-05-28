@@ -10,15 +10,16 @@ if ~isfield(StimObj, 'Stm')
     return
 end
 
-Par.helpline = 1;
 h = gcf;
-if Par.helpline
-    figure
-    Par.barlh = uicontrol('Style','edit','String','1');
-end
+
 Log = [];
 logfile = input('Please enter a name for the logfile \n','s');
 Par.Ndistract = str2double(input('Please enter the number of distractors \n','s'));
+
+h2 = findobj('tag','ndistractorbox');
+
+set(h2, 'string', num2str(Par.Ndistract))
+
 figure(h)
 
 if ~isempty(logfile)
@@ -441,7 +442,7 @@ while ~Par.ESC
         else
            Log.RT(lc) = NaN;
         end
-        Log.Ndistractors = Par.Ndistract;
+        Log.Ndistractors(lc) = Par.Ndistract;
         Log.Easymode(lc) = Par.easymode;
         Log.Easy(lc) = easy;
         Log.Par = Par;
@@ -463,7 +464,7 @@ while ~Par.ESC
     display(['hit ' num2str(Hit) ' reactiontime: ' num2str(LPStat(5))  ' saccadetime: ' num2str(LPStat(6))]);
     disp(['stimulus-target duration: ' num2str((FS - FO)*1000) ' ms ']);  %check timing of target onset
     if isfield(Log, 'Targetpos')
-        hits = [sum(Log.Targetpos == 1 & Log.Hit == 2 & Log.Trial > lc - 50)/sum(Log.Targetpos == 1 & Log.Trial > lc - 50), sum(Log.Targetpos == 2 & Log.Hit == 2 & Log.Trial > lc - 50)/sum(Log.Targetpos == 2 & Log.Trial > lc - 50), sum(Log.Targetpos == 3 & Log.Hit == 2 & Log.Trial > lc - 50)/sum(Log.Targetpos == 3 & Log.Trial > lc - 50)];
+        hits = [sum(Log.Targetpos == 1 & Log.Hit == 2 & Log.Trial > lc - Par.nbacklog)/sum(Log.Targetpos == 1 & Log.Trial > lc - Par.nbacklog), sum(Log.Targetpos == 2 & Log.Hit == 2 & Log.Trial > lc - Par.nbacklog)/sum(Log.Targetpos == 2 & Log.Trial > lc - Par.nbacklog), sum(Log.Targetpos == 3 & Log.Hit == 2 & Log.Trial > lc - Par.nbacklog)/sum(Log.Targetpos == 3 & Log.Trial > lc - Par.nbacklog)];
         disp(['Trial: ' num2str(lc) ' | 1: ' num2str(hits(1)) ', 2: ' num2str(hits(2)) ', 3: ', num2str(hits(3))])
     end
     %reset all bits to null
@@ -522,7 +523,7 @@ end
 
 function drawhelpline
         global Par
-        if Par.helpline
+        if Par.helpline > 0
             cgpencol(0, 0, 0)
             cgpenwid(2)
             if Par.Target == 1
@@ -533,7 +534,7 @@ function drawhelpline
             vector = [tx, 0] - [Par.TarX - 30, Par.TarY];
             mag = norm(vector);
             vec = vector/mag;
-            cgdraw(Par.TarX-30, Par.TarY, Par.TarX - 30 + vec(1)*mag*str2double(get(Par.barlh, 'String')) , Par.TarY + vec(2)*mag*str2double(get(Par.barlh, 'String'))) 
+            cgdraw(Par.TarX-30, Par.TarY, Par.TarX - 30 + vec(1)*mag*Par.helpline , Par.TarY + vec(2)*mag*Par.helpline) 
         end
 end
 
