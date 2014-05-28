@@ -10,15 +10,16 @@ if ~isfield(StimObj, 'Stm')
     return
 end
 
-Par.helpline = 1;
 h = gcf;
-if Par.helpline
-    figure
-    Par.barlh = uicontrol('Style','edit','String','1');
-end
+
 Log = [];
 logfile = input('Please enter a name for the logfile \n','s');
 Par.Ndistract = str2double(input('Please enter the number of distractors \n','s'));
+
+h2 = findobj('tag','ndistractorbox');
+
+set(h2, 'string', num2str(Par.Ndistract))
+
 figure(h)
 
 if ~isempty(logfile)
@@ -29,6 +30,7 @@ end
 
 trials = [];
 tc = 0;
+lc = 0;
 Times = Par.Times; %copy timing structure
 BG = Par.BG; %background Color
 cgflip(BG(1), BG(2), BG(3))
@@ -37,7 +39,7 @@ Stms = StimObj.Stm;   %all stimuli
 Objs = StimObj.Obj;   %all graphical objects
 IDs = [ Objs(:).Id ]; %Ids of all graphical objects
 
-Par.easymode = 1;
+Par.easymode = 0;
 
 %they should all be not loaded, but just to make sure
 for i = 1:length(IDs)
@@ -95,8 +97,10 @@ while ~Par.ESC
         
         Par.Target = trials(t, 1);
         Par.Distractor = trials(t, 2);
-        Par.Targetpos = 1; %trials(t, 3);
+        Par.Targetpos = trials(t, 3);
         Par.Distractorpos = trials(t, 4);
+        Par.Randpos = 1:3;
+        Par.Randpos([Par.Targetpos Par.Distractorpos]) = [];
         
         %or use custom randomisation procedure
         I = Par.Target;
@@ -424,27 +428,29 @@ while ~Par.ESC
         
     end
     
-     if logon
-        Log.Trial(tc) = tc;
-        Log.Hit(tc) = Hit;
-        Log.Target(tc) = Par.Target;
-        Log.Distractor(tc) = Par.Distractor;
-        Log.Targetpos(tc) = Par.Targetpos;
-        Log.Distractorpos(tc) = Par.Distractorpos;
+     if logon && Hit ~= 0 && ~Abort
+        lc = lc + 1;
+        Log.Trial(lc) = tc;
+        Log.Hit(lc) = Hit;
+        Log.Target(lc) = Par.Target;
+        Log.Distractor(lc) = Par.Distractor;
+        Log.Targetpos(lc) = Par.Targetpos;
+        Log.Distractorpos(lc) = Par.Distractorpos;
+        Log.Randpos(lc) = Par.Randpos;
         if Hit > 0
-            Log.RT(tc) = Time;
+            Log.RT(lc) = Time;
         else
-           Log.RT(tc) = NaN;
+           Log.RT(lc) = NaN;
         end
-        Log.Ndistractors = Par.Ndistract;
-        Log.Easymode(tc) = Par.easymode;
-        Log.Easy(tc) = easy;
+        Log.Ndistractors(lc) = Par.Ndistract;
+        Log.Easymode(lc) = Par.easymode;
+        Log.Easy(lc) = easy;
         Log.Par = Par;
         Log.Shape = Objs(shapeobjid);
         save(['log\' logfile], 'Log')
     end
     
-    if Hit ~= 2  %error response
+    if Hit ~= 2 && ~Abort  %error response
         %add pause when subject makes error
         for i = 1:round(Times.Err/5)   %keep targoff for Times.Err(ms)
             pause(0.005)
@@ -457,6 +463,10 @@ while ~Par.ESC
     %///////////////////////INTERTRIAL AND CLEANUP
     display(['hit ' num2str(Hit) ' reactiontime: ' num2str(LPStat(5))  ' saccadetime: ' num2str(LPStat(6))]);
     disp(['stimulus-target duration: ' num2str((FS - FO)*1000) ' ms ']);  %check timing of target onset
+    if isfield(Log, 'Targetpos')
+        hits = [sum(Log.Targetpos == 1 & Log.Hit == 2 & Log.Trial > lc - Par.nbacklog)/sum(Log.Targetpos == 1 & Log.Trial > lc - Par.nbacklog), sum(Log.Targetpos == 2 & Log.Hit == 2 & Log.Trial > lc - Par.nbacklog)/sum(Log.Targetpos == 2 & Log.Trial > lc - Par.nbacklog), sum(Log.Targetpos == 3 & Log.Hit == 2 & Log.Trial > lc - Par.nbacklog)/sum(Log.Targetpos == 3 & Log.Trial > lc - Par.nbacklog)];
+        disp(['Trial: ' num2str(lc) ' | 1: ' num2str(hits(1)) ', 2: ' num2str(hits(2)) ', 3: ', num2str(hits(3))])
+    end
     %reset all bits to null
     for i = [0 1 2 3 4 5 6 7]  %Error, Stim, Saccade, Trial, Correct,
         %calllib(Par.Dll, 'DO_Bit', i, 0);
@@ -495,11 +505,15 @@ function details = filldetails
 n = 0;
 for t = 1:2
     for d = 1:2
-        for tp = 1:3
+        for tp = 1:3 % 3
             for dp = 1:3
                 if tp ~= dp
                     n = n+1;
                     details(n, :) = [t, d, tp, dp, n];
+%                     if tp == 1 || tp == 3
+%                         n = n+1;
+%                         details(n, :) = [t, d, tp, dp, n];
+%                     end
                 end
             end
         end
@@ -509,18 +523,18 @@ end
 
 function drawhelpline
         global Par
-        if Par.helpline
+        if Par.helpline > 0
             cgpencol(0, 0, 0)
-            cgpenwid(3)
+            cgpenwid(2)
             if Par.Target == 1
                 tx = -395.5;
             else
                 tx = 395.5;
             end
-            vector = [tx, 0] - [40, -80];
+            vector = [tx, 0] - [Par.TarX - 30, Par.TarY];
             mag = norm(vector);
             vec = vector/mag;
-            cgdraw(40, -80, 40 + vec(1)*mag*str2double(get(Par.barlh, 'String')) , -80 + vec(2)*mag*str2double(get(Par.barlh, 'String'))) 
+            cgdraw(Par.TarX-30, Par.TarY, Par.TarX - 30 + vec(1)*mag*Par.helpline , Par.TarY + vec(2)*mag*Par.helpline) 
         end
 end
 

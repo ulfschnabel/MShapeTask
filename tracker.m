@@ -22,7 +22,7 @@ function varargout = tracker(varargin)
 
 % Edit the above text to modify the response to help tracker
 
-% Last Modified by GUIDE v2.5 13-May-2014 21:57:16
+% Last Modified by GUIDE v2.5 20-May-2014 13:27:56
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1570,6 +1570,8 @@ function colorbox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+global Par
+Par.color = 0;
 
 
 
@@ -1594,3 +1596,58 @@ function linebox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+global Par
+Par.helpline = 0;
+
+
+
+function nbackbox_Callback(hObject, eventdata, handles)
+% hObject    handle to nbackbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of nbackbox as text
+%        str2double(get(hObject,'String')) returns contents of nbackbox as a double
+global Par
+Par.nbacklog = str2num(get(hObject, 'string'));
+
+% --- Executes during object creation, after setting all properties.
+function nbackbox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to nbackbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+global Par
+Par.nbacklog = 50;
+
+
+
+function ndistractorbox_Callback(hObject, eventdata, handles)
+% hObject    handle to ndistractorbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of ndistractorbox as text
+%        str2double(get(hObject,'String')) returns contents of ndistractorbox as a double
+global Par
+Par.Ndistract = str2num(get(hObject, 'string'));
+
+
+% --- Executes during object creation, after setting all properties.
+function ndistractorbox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ndistractorbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+global Par
+Par.Ndistract = 0;
