@@ -173,16 +173,19 @@ for i = t:2*pi/Shape.NOut:2*pi-(2*pi/Shape.NOut)+t
 end
 global Par
 if ~isfield(Par, 'Ndistract')
-    prompt = {'Target (1 or 2)', 'Distractor (1 or 2)', 'Number of Distractors', 'Targetpos', 'Distractorpos'};
+    prompt = {'Target (1 or 2)', 'Distractor (1 or 2)', 'Number of Distractors', 'Targetpos', 'Distractorpos', 'Randpos'};
     dlg_title = 'No Par, so please choose';
     num_lines = 1;
-    def = {'1','1','17', '1', '2'};
+    def = {'1','1','17', '1', '2', '3'};
     answer = inputdlg(prompt,dlg_title,num_lines,def);
     Par.Target = str2double(answer{1});
     Par.Distractor = str2double(answer{2});
     Par.Ndistract = str2double(answer{3});
     Par.Targetpos = str2double(answer{4});
+    Par.Randpos = str2double(answer{6});;
     Par.Distractorpos = str2double(answer{5});
+    Par.color = 0;
+    
 end
 
 tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos), Shape.Targetpos(Par.Randpos)];
@@ -193,9 +196,9 @@ if Par.Ndistract > 1
         if Par.Ndistract <= Shape.NIn - 1;
             distpos = 1:Shape.NIn;
             distpos(tdpos) = [];
-            distpos = randsample(distpos, Par.Ndistract-1, 0);
+            distpos = randsample(distpos, Par.Ndistract-2, 0);
         else
-            distpos = Shape.NIn + 1:Shape.NOut;
+            distpos = Shape.NIn + 1:Shape.NOut+Shape.NIn;
             innerdistpos = 1:Shape.NIn;
             innerdistpos(tdpos) = [];
             distpos = [innerdistpos randsample(distpos, Par.Ndistract- Shape.NIn + 1, 0)];
