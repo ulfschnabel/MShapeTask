@@ -167,11 +167,11 @@ for i = 1:length(dates)
                     hold(ph,'on');
                     ENV = nanmean(data{i,j}{chn}(:,Log{i, j}.Targetpos == 1 & Log{i, j}.Color == 0) , 2)/ normto(chn);
                     h(1) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'r');
-                    if Log{i, j}.Ndistractors > 0
+                    if max(Log{i, j}.Ndistractors) > 0
                         ENV = nanmean(data{i,j}{chn}(:,Log{i, j}.Distractorpos == 1) , 2)/ normto(chn);
                         h(2) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'b');
                     end
-                    if Log{i, j}.Ndistractors > 1
+                    if max(Log{i, j}.Ndistractors) > 1
                         ENV = nanmean(data{i,j}{chn}(:,Log{i, j}.Randpos == 1) , 2)/ normto(chn);
                         h(3) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'g');
                     end
@@ -195,11 +195,11 @@ for i = 1:length(dates)
                     hold(ph,'on');
                     ENV = nanmean(data{i,j}{chn}(:,Log{i, j}.Targetpos == 1 & Log{i, j}.Color == 0) , 2)/ normto(chn);
                     h(1) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'r');
-                    if Log{i, j}.Ndistractors > 0
+                    if max(Log{i, j}.Ndistractors) > 0
                         ENV = nanmean(data{i,j}{chn}(:,Log{i, j}.Distractorpos == 1) , 2)/ normto(chn);
                         h(2) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'b');
                     end
-                    if Log{i, j}.Ndistractors > 1
+                    if max(Log{i, j}.Ndistractors) > 1
                         ENV = nanmean(data{i,j}{chn}(:,Log{i, j}.Randpos == 1) , 2)/ normto(chn);
                         h(3) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'g');
                     end
@@ -225,11 +225,14 @@ for i = 1:length(dates)
     for j = 1:size(blocks(i, :), 2)
         if max(Log{i, j}.Ndistractors) > 0
             
-                targetmean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Targetpos == 1 & Log{i, j}.Color == 0), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
+                target1mean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Targetpos == 1 & Log{i, j}.Color == 0 & Log{i, j}.Target == 1), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
+                target2mean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Targetpos == 1 & Log{i, j}.Color == 0 & Log{i, j}.Target == 2), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
                 if max(Log{i, j}.Ndistractors) > 0
-                    distmean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Distractorpos == 1), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
+                    dist1mean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Distractorpos == 1 & Log{i, j}.Distractor == 1), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
+                    dist2mean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Distractorpos == 1 & Log{i, j}.Distractor == 2), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
                 else
-                    distmean = NaN(size(data{i, j}{1}, 1), size(data{i, j}));
+                    dist1mean = NaN(size(data{i, j}{1}, 1), size(data{i, j}));
+                    dist2mean = NaN(size(data{i, j}{1}, 1), size(data{i, j}));
                 end
                 if max(Log{i, j}.Ndistractors) > 1
                     randmean = reshape(cell2mat(cellfun(@(x) getchannelmean(x, Log{i, j}.Randpos == 1), data{i,j}, 'UniformOutput' , 0)), size(data{i, j}{1}, 1), size(data{i, j}, 1));
@@ -238,23 +241,27 @@ for i = 1:length(dates)
                 end
                 
                 chn = min(find(strcmp(array{i, j}, 'c1v11'))):max(find(strcmp(array{i, j}, 'c1v11')));
-                normto = max([max(max(mean(targetmean(:, chn), 2))), max(max(mean(distmean(:, chn), 2))), max(max(mean(randmean(:, chn), 2)))]);
+                normto = max([max(max(mean(target1mean(:, chn), 2))), max(max(mean(target2mean(:, chn), 2))), max(max(mean(dist1mean(:, chn), 2))), max(max(mean(dist2mean(:, chn), 2))), max(max(mean(randmean(:, chn), 2)))]);
                 figure('color', 'white', 'position', [0 0 2475/2.3, 3525/2.3])
                 clear h
                 hold on
-                ENV = mean(targetmean(:, chn), 2);
+                ENV = mean(target1mean(:, chn), 2);
                 h(1) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'r');
+                ENV = mean(target2mean(:, chn), 2);
+                h(2) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'b');
                 if max(Log{i, j}.Ndistractors) > 0
-                    ENV = mean(distmean(:, chn), 2);
-                    h(2) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'b');
+                    ENV = mean(dist1mean(:, chn), 2);
+                    h(3) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'm');
+                    ENV = mean(dist2mean(:, chn), 2);
+                    h(4) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'g');
                 end
                 if max(Log{i, j}.Ndistractors) > 1
                     ENV = mean(randmean(:, chn), 2);
-                    h(3) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'g');
+                    h(5) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'k');
                 end
                 hold off
                 title('Con 1 Array V1_1')
-                    lh = legend(h, {'Target', 'Distractor', 'Randdistractor'});
+                    lh = legend(h, {'Target1', 'Target2' 'Distractor 1', 'Distractor 2', 'Randdistractor'});
                 xlim([0 550])
                 ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
             text(0.5, 1,[monkey ' ' dates{i}, ' ', blocks{i, j}],'HorizontalAlignment' ,'center','VerticalAlignment', 'top', 'FontSize', 30)
@@ -262,23 +269,27 @@ for i = 1:length(dates)
                 m = 0;
                 figure('color', 'white', 'position', [0 0 2475/2.3, 3525/2.3])
                 chn = min(find(strcmp(array{i, j}, 'c1v12'))):max(find(strcmp(array{i, j}, 'c1v12')));
-                normto = max([max(max(mean(targetmean(:, chn), 2))), max(max(mean(distmean(:, chn), 2))), max(max(mean(randmean(:, chn), 2)))]);
+                normto = max([max(max(mean(target1mean(:, chn), 2))), max(max(mean(target2mean(:, chn), 2))), max(max(mean(dist1mean(:, chn), 2))), max(max(mean(dist2mean(:, chn), 2))), max(max(mean(randmean(:, chn), 2)))]);
                 figure('color', 'white', 'position', [0 0 2475/2.3, 3525/2.3])
                 clear h
                 hold on
-                ENV = mean(targetmean(:, chn), 2);
+                ENV = mean(target1mean(:, chn), 2);
                 h(1) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'r');
+                ENV = mean(target2mean(:, chn), 2);
+                h(2) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'b');
                 if max(Log{i, j}.Ndistractors) > 0
-                    ENV = mean(distmean(:, chn), 2);
-                    h(2) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'b');
+                    ENV = mean(dist1mean(:, chn), 2);
+                    h(3) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'm');
+                    ENV = mean(dist2mean(:, chn), 2);
+                    h(4) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'g');
                 end
                 if max(Log{i, j}.Ndistractors) > 1
                     ENV = mean(randmean(:, chn), 2);
-                    h(3) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'g');
+                    h(5) = plot(smooth(filtfilt(fb, fa, ENV), 11), 'color' , 'k');
                 end
                 hold off
                 title('Con 1 Array V1_2')
-                    lh = legend(h, {'Target', 'Distractor', 'Randdistractor'});
+                    lh = legend(h, {'Target1', 'Target2' 'Distractor 1', 'Distractor 2', 'Randdistractor'});
                 xlim([0 550])
                 ha = axes('Position',[0 0 1 1],'Xlim',[0 1],'Ylim',[0 1],'Box','off','Visible','off','Units','normalized', 'clipping' , 'off');
             text(0.5, 1,[monkey ' ' dates{i}, ' ', blocks{i, j}],'HorizontalAlignment' ,'center','VerticalAlignment', 'top', 'FontSize', 30)
