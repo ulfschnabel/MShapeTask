@@ -67,8 +67,8 @@ if nargin > 0
                 %             Shape.stimuli(i) = {MakeShapeImage(goodhalfcirc{i}, Shape.Size, 5)};
                 %             Shape.orientation(i) = 1;
                 %         end
-                Shape.stimuli(2, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 180)};
-                Shape.stimuli(1, i) = {MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25))};
+                Shape.stimuli(2, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 270)};
+                Shape.stimuli(1, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 90)};
             end
             Shape.Randdistractors = 1:length(goodhalfcirc);
             Shape.Randdistractors([Shape.Targets Shape.Distractors]) = [];
@@ -141,8 +141,8 @@ else
         %             Shape.stimuli(i) = {MakeShapeImage(goodhalfcirc{i}, Shape.Size, 5)};
         %             Shape.orientation(i) = 1;
         %         end
-        Shape.stimuli(2, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 180)};
-        Shape.stimuli(1, i) = {MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25))};
+        Shape.stimuli(2, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 270)};
+        Shape.stimuli(1, i) = {imrotate(MakeShapeImage(goodhalfcirc{i}, Shape.Size, round(Shape.Size/25)), 90)};
     end
     Shape.Randdistractors = 1:length(goodhalfcirc);
     Shape.Randdistractors([Shape.Targets Shape.Distractors]) = [];
@@ -152,12 +152,13 @@ end
 
 function Shape = plotShape(Shape, Id)
 
-y = Shape.RF(2);
-if Shape.Orientation == 1
-    x = Shape.RF(1) + floor(Shape.Size*0.75*0.5);
-else
-    x = Shape.RF(1) - floor(Shape.Size*0.75*0.5);
-end
+y = Shape.RF(2) - floor(Shape.Size*0.75*0.5);
+% if Shape.Orientation == 1
+%     x = Shape.RF(1) + floor(Shape.Size*0.75*0.5);
+% else
+%     x = Shape.RF(1) - floor(Shape.Size*0.75*0.5);
+% end
+ x = Shape.RF(1);
 [t, r] = cart2pol(y , x);
 
 n = 0;
@@ -190,7 +191,7 @@ end
 
 tdpos = [Shape.Targetpos(Par.Targetpos), Shape.Targetpos(Par.Distractorpos), Shape.Targetpos(Par.Randpos)];
 if Par.Ndistract > 1
-    typevec = [Shape.Targets(Par.Target) Shape.Distractors(Par.Distractor) randsample(Shape.Randdistractors, Par.Ndistract-1,  0)];
+    typevec = [Shape.Targets(Par.Target) Shape.Distractors(Par.Distractor) randsample(Shape.Randdistractors, Par.Ndistract-2,  0)];
     distpos = [];
     if Par.Ndistract > 2
         if Par.Ndistract <= Shape.NIn - 1;
@@ -201,7 +202,7 @@ if Par.Ndistract > 1
             distpos = Shape.NIn + 1:Shape.NOut+Shape.NIn;
             innerdistpos = 1:Shape.NIn;
             innerdistpos(tdpos) = [];
-            distpos = [innerdistpos randsample(distpos, Par.Ndistract- Shape.NIn + 1, 0)];
+            distpos = [innerdistpos randsample(distpos, Par.Ndistract- Shape.NIn, 0)];
         end
     end
     posvec = [tdpos distpos];
