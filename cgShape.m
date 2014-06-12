@@ -183,7 +183,7 @@ if ~isfield(Par, 'Ndistract')
     Par.Distractor = str2double(answer{2});
     Par.Ndistract = str2double(answer{3});
     Par.Targetpos = str2double(answer{4});
-    Par.Randpos = str2double(answer{6});;
+    Par.Randpos = str2double(answer{6});
     Par.Distractorpos = str2double(answer{5});
     Par.color = 0;
     
